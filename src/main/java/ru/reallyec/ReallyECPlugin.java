@@ -174,7 +174,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
 
         if (holder instanceof UpgradeMenuHolder) {
             event.setCancelled(true);
-            Upgrade upgrade = upgradeBySlot(event.getRawSlot());
+            Upgrade upgrade = upgradeBySlot(event.getRawSlot(), getData(player.getUniqueId()).slots);
             if (upgrade != null) {
                 PlayerData data = getData(player.getUniqueId());
                 if (data.slots == previousSlots(upgrade.slots)) {
@@ -345,24 +345,19 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             inventory.setItem(i, i < data.slots ? unlocked : locked);
         }
 
-        boolean showOnlyNext = getConfig().getBoolean("menus.upgrade.show-only-next-upgrade", true);
         for (Upgrade upgrade : getUpgrades()) {
-            if (upgrade.slot < 0 || upgrade.slot >= size) {
-                continue;
-            }
-            if (showOnlyNext && data.slots != previousSlots(upgrade.slots)) {
+            int fromSlot = previousSlots(upgrade.slots);
+            int toSlot = upgrade.slots - 1;
+            if (data.slots != fromSlot) {
                 continue;
             }
             Map<String, String> placeholders = placeholders(upgrade.slots, upgrade.price);
             List<String> lore = new ArrayList<String>(upgrade.lore);
-            if (data.slots >= upgrade.slots) {
-                lore.addAll(getConfig().getStringList("menus.upgrade.bought-lore"));
-            } else if (data.slots == previousSlots(upgrade.slots)) {
-                lore.addAll(getConfig().getStringList("menus.upgrade.available-lore"));
-            } else {
-                lore.addAll(getConfig().getStringList("menus.upgrade.need-previous-lore"));
+            lore.addAll(getConfig().getStringList("menus.upgrade.available-lore"));
+            ItemStack upgradeItem = makeItem(upgrade.material, upgrade.name, lore, false, placeholders);
+            for (int slot = fromSlot; slot <= toSlot && slot < size; slot++) {
+                inventory.setItem(slot, upgradeItem);
             }
-            inventory.setItem(upgrade.slot, makeItem(upgrade.material, upgrade.name, lore, false, placeholders));
         }
         player.openInventory(inventory);
     }
@@ -525,9 +520,11 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         return upgrades;
     }
 
-    private Upgrade upgradeBySlot(int slot) {
+    private Upgrade upgradeBySlot(int slot, int currentSlots) {
         for (Upgrade upgrade : getUpgrades()) {
-            if (upgrade.slot == slot) {
+            int fromSlot = previousSlots(upgrade.slots);
+            int toSlot = upgrade.slots - 1;
+            if (currentSlots == fromSlot && slot >= fromSlot && slot <= toSlot) {
                 return upgrade;
             }
         }

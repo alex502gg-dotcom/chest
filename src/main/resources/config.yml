@@ -43,7 +43,6 @@ menus:
   upgrade:
     title: "&eУлучшение эндер-сундука"
     size: 54
-    show-only-next-upgrade: true
     unlocked-slot:
       material: LIME_STAINED_GLASS_PANE
       name: "&aРазблокированный слот"
@@ -98,25 +97,25 @@ menus:
 
 upgrades:
   "36":
-    # Центр третьего ряда: при 27 слотах выглядит как предмет следующего этапа среди зелёной зоны.
-    slot: 22
-    material: ENDER_CHEST
+    # Этот этап занимает слоты 27-35.
+    slot: 27
+    material: RED_STAINED_GLASS_PANE
     name: "&dУлучшение до 36 слотов"
     lore:
       - "&7Открывает ещё один ряд."
     price: 25000
   "45":
-    # Последний слот четвёртого ряда: как на твоём скрине после открытия 36 слотов.
-    slot: 35
-    material: ENDER_CHEST
+    # Этот этап занимает слоты 36-44.
+    slot: 36
+    material: RED_STAINED_GLASS_PANE
     name: "&dУлучшение до 45 слотов"
     lore:
       - "&7Открывает пятый ряд."
     price: 50000
   "54":
-    # Последний слот пятого ряда.
-    slot: 44
-    material: ENDER_CHEST
+    # Этот этап занимает слоты 45-53.
+    slot: 45
+    material: RED_STAINED_GLASS_PANE
     name: "&dУлучшение до 54 слотов"
     lore:
       - "&7Максимальный эндер-сундук."
