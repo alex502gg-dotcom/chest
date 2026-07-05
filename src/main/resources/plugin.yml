@@ -1,0 +1,22 @@
+name: ReallyEC
+version: 1.0.0
+main: ru.reallyec.ReallyECPlugin
+api-version: 1.16
+author: Codex
+description: Расширяемый эндер-сундук до 54 слотов с меню и улучшениями.
+commands:
+  ec:
+    description: Открыть меню эндер-сундука.
+    aliases: [enderchest, echest, ender, enderc]
+    usage: /ec
+  reallyec:
+    description: Админ-команды ReallyEC.
+    aliases: [rec]
+    usage: /reallyec reload
+permissions:
+  reallyec.use:
+    description: Разрешает пользоваться /ec и эндер-сундуком.
+    default: true
+  reallyec.reload:
+    description: Разрешает перезагружать конфиг.
+    default: op

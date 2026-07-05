@@ -1,0 +1,108 @@
+# ReallyEC - расширяемый эндер-сундук.
+# Цвета поддерживают &-коды: &a, &l, &r и т.д.
+
+settings:
+  default-slots: 27
+  max-slots: 54
+  chest-title: "&5Эндер-сундук"
+  save-on-close: true
+  open-menu-from-command: true
+  open-custom-chest-from-block: true
+
+menus:
+  main:
+    title: "&5Эндер-сундук"
+    size: 27
+    filler:
+      enabled: true
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+      lore: []
+    items:
+      open:
+        slot: 11
+        material: PURPLE_SHULKER_BOX
+        name: "&dОткрыть эндер-сундук"
+        lore:
+          - "&7Доступно слотов: &f%slots%"
+          - ""
+          - "&eНажмите, чтобы открыть."
+        glow: true
+      upgrade:
+        slot: 15
+        material: YELLOW_SHULKER_BOX
+        name: "&eУлучшить эндер-сундук"
+        lore:
+          - "&7Максимум: &f%max_slots% &7слотов"
+          - ""
+          - "&eНажмите, чтобы открыть улучшения."
+        glow: true
+  upgrade:
+    title: "&eУлучшение эндер-сундука"
+    size: 54
+    filler:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
+      name: " "
+      lore: []
+    back:
+      enabled: true
+      slot: 49
+      material: ARROW
+      name: "&aНазад"
+      lore:
+        - "&7Вернуться в главное меню."
+    completed-item:
+      material: LIME_STAINED_GLASS_PANE
+      name: "&aУже открыто"
+      lore:
+        - "&7У вас уже доступно &f%slots% &7слотов."
+    locked-lore:
+      - ""
+      - "&7Стоимость:"
+      - "%requirements%"
+      - ""
+      - "&eНажмите, чтобы купить."
+    current-lore:
+      - ""
+      - "&aЭто ваш текущий размер."
+
+upgrades:
+  "36":
+    slot: 20
+    material: ENDER_CHEST
+    name: "&dУлучшение до 36 слотов"
+    lore:
+      - "&7Открывает ещё один ряд."
+    requirements:
+      ENDER_PEARL: 16
+      OBSIDIAN: 8
+  "45":
+    slot: 22
+    material: ENDER_CHEST
+    name: "&dУлучшение до 45 слотов"
+    lore:
+      - "&7Открывает пятый ряд."
+    requirements:
+      ENDER_EYE: 8
+      DIAMOND: 4
+  "54":
+    slot: 24
+    material: ENDER_CHEST
+    name: "&dУлучшение до 54 слотов"
+    lore:
+      - "&7Максимальный эндер-сундук."
+    requirements:
+      NETHER_STAR: 1
+      DIAMOND_BLOCK: 2
+
+messages:
+  no-permission: "&cУ вас нет прав."
+  reload: "&aКонфиг ReallyEC перезагружен."
+  only-player: "&cЭту команду может использовать только игрок."
+  already-max: "&cВаш эндер-сундук уже максимального размера."
+  need-previous: "&cСначала купите предыдущее улучшение."
+  not-enough-items: "&cНе хватает предметов для улучшения."
+  upgraded: "&aЭндер-сундук улучшен до &f%slots% &aслотов!"
+  blocked-slot: "&cЭтот слот ещё не открыт. Улучшите эндер-сундук."
+  unknown-command: "&cИспользуйте: /reallyec reload"
