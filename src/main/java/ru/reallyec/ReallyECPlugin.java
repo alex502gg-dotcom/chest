@@ -108,12 +108,28 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(args[0], Arrays.asList("reload", "clear", "invsee"));
+            List<String> commands = new ArrayList<String>();
+            if (hasPerm(sender, "ecrw.reload")) {
+                commands.add("reload");
+            }
+            if (hasPerm(sender, "ecrw.clear")) {
+                commands.add("clear");
+            }
+            if (canUseInvsee(sender)) {
+                commands.add("invsee");
+            }
+            return filter(args[0], commands);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("clear")) {
+            if (!hasPerm(sender, "ecrw.clear")) {
+                return Collections.emptyList();
+            }
             return filter(args[1], Arrays.asList("upgrade", "inv"));
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("clear")) {
+            if (!hasPerm(sender, "ecrw.clear")) {
+                return Collections.emptyList();
+            }
             List<String> values = new ArrayList<String>();
             values.add("*");
             for (Player player : Bukkit.getOnlinePlayers()) {
@@ -122,6 +138,9 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             return filter(args[2], values);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("invsee")) {
+            if (!canUseInvsee(sender)) {
+                return Collections.emptyList();
+            }
             List<String> values = new ArrayList<String>();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 values.add(player.getName());
@@ -631,6 +650,10 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
 
     private boolean hasPerm(CommandSender sender, String permission) {
         return sender.hasPermission("ecrw.*") || sender.hasPermission(permission);
+    }
+
+    private boolean canUseInvsee(CommandSender sender) {
+        return hasPerm(sender, "ecrw.invsee.player") || hasPerm(sender, "ecrw.invsee.admin");
     }
 
     private String formatMoney(double value) {

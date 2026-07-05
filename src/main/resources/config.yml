@@ -82,13 +82,13 @@ menus:
         - ""
         - "&fПодтвердите покупку."
       glow: true
-    yes:
+    "yes":
       slots: [0, 1, 2, 3]
       material: LIME_STAINED_GLASS_PANE
       name: "&aДа, купить"
       lore:
         - "&7Списать &6%price%$ &7и открыть слоты."
-    no:
+    "no":
       slots: [5, 6, 7, 8]
       material: RED_STAINED_GLASS_PANE
       name: "&cНет, назад"

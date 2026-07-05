@@ -10,10 +10,14 @@ commands:
     description: Меню и админ-команды эндер-сундука.
     aliases: [enderchest, echest, ender, enderc]
     usage: /ec
+    permission: ecrw.use
+    permission-message: "§cУ вас нет прав."
   reallyec:
     description: Дополнительный алиас команд ReallyEC.
     aliases: [rec]
     usage: /reallyec reload
+    permission: ecrw.reload
+    permission-message: "§cУ вас нет прав."
 permissions:
   ecrw.*:
     description: Все права ReallyEC.
