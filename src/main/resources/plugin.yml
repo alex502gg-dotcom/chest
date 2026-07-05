@@ -1,0 +1,41 @@
+name: ReallyEC
+version: 1.0.0
+main: ru.reallyec.ReallyECPlugin
+api-version: 1.16
+author: Codex
+softdepend: [Essentials, Vault]
+description: Расширяемый эндер-сундук до 54 слотов с меню и улучшениями за деньги.
+commands:
+  ec:
+    description: Меню и админ-команды эндер-сундука.
+    aliases: [enderchest, echest, ender, enderc]
+    usage: /ec
+  reallyec:
+    description: Дополнительный алиас команд ReallyEC.
+    aliases: [rec]
+    usage: /reallyec reload
+permissions:
+  ecrw.*:
+    description: Все права ReallyEC.
+    default: op
+    children:
+      ecrw.use: true
+      ecrw.reload: true
+      ecrw.clear: true
+      ecrw.invsee.player: true
+      ecrw.invsee.admin: true
+  ecrw.use:
+    description: Разрешает пользоваться /ec и эндер-сундуком.
+    default: true
+  ecrw.reload:
+    description: Разрешает перезагружать конфиг через /ec reload.
+    default: op
+  ecrw.clear:
+    description: Разрешает очищать EC и сбрасывать улучшения.
+    default: op
+  ecrw.invsee.player:
+    description: Разрешает смотреть чужой EC без возможности брать вещи.
+    default: op
+  ecrw.invsee.admin:
+    description: Разрешает смотреть и редактировать чужой EC, включая забор вещей.
+    default: op

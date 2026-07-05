@@ -1,0 +1,143 @@
+# ReallyEC - расширяемый эндер-сундук.
+# Цвета поддерживают &-коды: &a, &l, &r и т.д.
+# Деньги списываются через Vault, если он есть, либо напрямую через EssentialsX Economy.
+
+settings:
+  default-slots: 27
+  max-slots: 54
+  chest-title: "&5Эндер-сундук &7(%slots%/%max_slots%)"
+  invsee-title: "&5EC игрока &f%player%"
+  save-on-close: true
+  open-menu-from-command: true
+  open-custom-chest-from-block: true
+
+menus:
+  main:
+    title: "&5Эндер-сундук"
+    size: 27
+    filler:
+      enabled: true
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+      lore: []
+    items:
+      open:
+        slot: 11
+        material: ENDER_CHEST
+        name: "&dОткрыть эндер-сундук"
+        lore:
+          - "&7Доступно слотов: &f%slots%"
+          - ""
+          - "&eНажмите, чтобы открыть."
+        glow: true
+      upgrade:
+        slot: 15
+        material: GOLD_INGOT
+        name: "&eУлучшить эндер-сундук"
+        lore:
+          - "&7Максимум: &f%max_slots% &7слотов"
+          - ""
+          - "&eНажмите, чтобы открыть улучшения."
+        glow: true
+
+  upgrade:
+    title: "&eУлучшение эндер-сундука"
+    size: 54
+    show-only-next-upgrade: true
+    unlocked-slot:
+      material: LIME_STAINED_GLASS_PANE
+      name: "&aРазблокированный слот"
+      lore:
+        - "&7Этот слот уже доступен."
+    locked-slot:
+      material: RED_STAINED_GLASS_PANE
+      name: "&cЗаблокированный слот"
+      lore:
+        - "&7Купите улучшение, чтобы открыть этот слот."
+    bought-lore:
+      - ""
+      - "&aЭто улучшение уже куплено."
+    available-lore:
+      - ""
+      - "&7Стоимость: &6%price%$"
+      - ""
+      - "&eНажмите, чтобы купить."
+    need-previous-lore:
+      - ""
+      - "&cСначала купите предыдущее улучшение."
+
+  confirm:
+    title: "&6Подтверждение"
+    size: 27
+    filler:
+      enabled: true
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+      lore: []
+    info:
+      slot: 13
+      material: ENDER_CHEST
+      name: "&dУлучшение до &f%slots% &dслотов"
+      lore:
+        - "&7Стоимость: &6%price%$"
+        - ""
+        - "&fПодтвердите покупку."
+      glow: true
+    yes:
+      slot: 11
+      material: LIME_STAINED_GLASS_PANE
+      name: "&aДа, купить"
+      lore:
+        - "&7Списать &6%price%$ &7и открыть слоты."
+    no:
+      slot: 15
+      material: RED_STAINED_GLASS_PANE
+      name: "&cНет, назад"
+      lore:
+        - "&7Вернуться к улучшениям."
+
+upgrades:
+  "36":
+    # Центр третьего ряда: при 27 слотах выглядит как предмет следующего этапа среди зелёной зоны.
+    slot: 22
+    material: ENDER_CHEST
+    name: "&dУлучшение до 36 слотов"
+    lore:
+      - "&7Открывает ещё один ряд."
+    price: 25000
+  "45":
+    # Последний слот четвёртого ряда: как на твоём скрине после открытия 36 слотов.
+    slot: 35
+    material: ENDER_CHEST
+    name: "&dУлучшение до 45 слотов"
+    lore:
+      - "&7Открывает пятый ряд."
+    price: 50000
+  "54":
+    # Последний слот пятого ряда.
+    slot: 44
+    material: ENDER_CHEST
+    name: "&dУлучшение до 54 слотов"
+    lore:
+      - "&7Максимальный эндер-сундук."
+    price: 100000
+
+messages:
+  no-permission: "&cУ вас нет прав."
+  reload: "&aКонфиг ReallyEC перезагружен."
+  only-player: "&cЭту команду может использовать только игрок."
+  unknown-command: "&cИспользуйте: /ec reload, /ec invsee <игрок>, /ec clear <upgrade|inv> <игрок|*>"
+  clear-usage: "&cИспользуйте: /ec clear <upgrade|inv> <игрок|*>"
+  invsee-usage: "&cИспользуйте: /ec invsee <игрок>"
+  player-not-found: "&cИгрок не найден."
+  already-max: "&cВаш эндер-сундук уже максимального размера."
+  already-bought: "&cЭто улучшение уже куплено."
+  need-previous: "&cСначала купите предыдущее улучшение."
+  not-enough-money: "&cНе хватает денег. Нужно: &6%price%$"
+  economy-error: "&cНе удалось списать деньги. Проверьте EssentialsX Economy или Vault."
+  upgraded: "&aЭндер-сундук улучшен до &f%slots% &aслотов за &6%price%$&a!"
+  blocked-slot: "&cЭтот слот ещё не открыт. Улучшите эндер-сундук."
+  clear-upgrade-all: "&aУлучшения и содержимое EC сброшены у &f%count% &aигроков."
+  clear-upgrade-player: "&aУлучшения и содержимое EC сброшены у игрока &f%player%&a."
+  clear-inv-all: "&aСодержимое EC очищено у &f%count% &aигроков."
+  clear-inv-player: "&aСодержимое EC очищено у игрока &f%player%&a."
