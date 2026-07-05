@@ -67,15 +67,15 @@ menus:
 
   confirm:
     title: "&6Подтверждение"
-    size: 27
+    size: 9
     filler:
-      enabled: true
+      enabled: false
       material: GRAY_STAINED_GLASS_PANE
       name: " "
       lore: []
     info:
-      slot: 13
-      material: ENDER_CHEST
+      slots: [4]
+      material: PURPLE_STAINED_GLASS_PANE
       name: "&dУлучшение до &f%slots% &dслотов"
       lore:
         - "&7Стоимость: &6%price%$"
@@ -83,13 +83,13 @@ menus:
         - "&fПодтвердите покупку."
       glow: true
     yes:
-      slot: 11
+      slots: [0, 1, 2, 3]
       material: LIME_STAINED_GLASS_PANE
       name: "&aДа, купить"
       lore:
         - "&7Списать &6%price%$ &7и открыть слоты."
     no:
-      slot: 15
+      slots: [5, 6, 7, 8]
       material: RED_STAINED_GLASS_PANE
       name: "&cНет, назад"
       lore:

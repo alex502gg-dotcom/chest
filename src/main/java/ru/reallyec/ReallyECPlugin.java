@@ -192,9 +192,9 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             event.setCancelled(true);
             ConfirmMenuHolder confirm = (ConfirmMenuHolder) holder;
             int slot = event.getRawSlot();
-            if (slot == getConfig().getInt("menus.confirm.yes.slot", 11)) {
+            if (configuredSlots("menus.confirm.yes").contains(slot)) {
                 buyUpgrade(player, confirm.upgrade);
-            } else if (slot == getConfig().getInt("menus.confirm.no.slot", 15)) {
+            } else if (configuredSlots("menus.confirm.no").contains(slot)) {
                 openUpgradeMenu(player);
             }
             return;
@@ -367,9 +367,9 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         Inventory inventory = Bukkit.createInventory(new ConfirmMenuHolder(upgrade), size, color(getConfig().getString("menus.confirm.title", "&6Подтверждение")));
         fill(inventory, "menus.confirm.filler");
         Map<String, String> placeholders = placeholders(upgrade.slots, upgrade.price);
-        setConfiguredItem(inventory, "menus.confirm.info", placeholders);
-        setConfiguredItem(inventory, "menus.confirm.yes", placeholders);
-        setConfiguredItem(inventory, "menus.confirm.no", placeholders);
+        setConfiguredItems(inventory, "menus.confirm.no", placeholders);
+        setConfiguredItems(inventory, "menus.confirm.yes", placeholders);
+        setConfiguredItems(inventory, "menus.confirm.info", placeholders);
         player.openInventory(inventory);
     }
 
@@ -557,6 +557,26 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         if (slot >= 0 && slot < inventory.getSize()) {
             inventory.setItem(slot, itemFromSimpleConfig(path, placeholders));
         }
+    }
+
+    private void setConfiguredItems(Inventory inventory, String path, Map<String, String> placeholders) {
+        ItemStack item = itemFromSimpleConfig(path, placeholders);
+        for (Integer slot : configuredSlots(path)) {
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, item);
+            }
+        }
+    }
+
+    private List<Integer> configuredSlots(String path) {
+        if (getConfig().isList(path + ".slots")) {
+            return getConfig().getIntegerList(path + ".slots");
+        }
+        int slot = getConfig().getInt(path + ".slot", -1);
+        if (slot >= 0) {
+            return Collections.singletonList(slot);
+        }
+        return Collections.emptyList();
     }
 
     private ItemStack itemFromSimpleConfig(String path, Map<String, String> placeholders) {
