@@ -45,6 +45,7 @@ import java.util.UUID;
 public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExecutor {
     private File playersFolder;
     private final Map<UUID, PlayerData> cache = new HashMap<UUID, PlayerData>();
+    private final Map<UUID, Inventory> openEnderChests = new HashMap<UUID, Inventory>();
     private final Set<UUID> openCustomChest = new HashSet<UUID>();
 
     @Override
@@ -64,10 +65,14 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
 
     @Override
     public void onDisable() {
+        for (Map.Entry<UUID, Inventory> entry : openEnderChests.entrySet()) {
+            saveInventoryContents(entry.getKey(), entry.getValue());
+        }
         for (Map.Entry<UUID, PlayerData> entry : cache.entrySet()) {
             saveData(entry.getKey(), entry.getValue());
         }
         cache.clear();
+        openEnderChests.clear();
         openCustomChest.clear();
     }
 
@@ -100,7 +105,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         if (getConfig().getBoolean("settings.open-menu-from-command", true)) {
             openMainMenu(player);
         } else {
-            openEnderChest(player, player.getUniqueId(), player.getName(), true, false);
+            openEnderChest(player, player.getUniqueId(), player.getName(), false);
         }
         return true;
     }
@@ -169,7 +174,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             return;
         }
         event.setCancelled(true);
-        openEnderChest(player, player.getUniqueId(), player.getName(), true, false);
+        openEnderChest(player, player.getUniqueId(), player.getName(), false);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -184,7 +189,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             event.setCancelled(true);
             int slot = event.getRawSlot();
             if (slot == getConfig().getInt("menus.main.items.open.slot", 11)) {
-                openEnderChest(player, player.getUniqueId(), player.getName(), true, false);
+                openEnderChest(player, player.getUniqueId(), player.getName(), false);
             } else if (slot == getConfig().getInt("menus.main.items.upgrade.slot", 15)) {
                 openUpgradeMenu(player);
             }
@@ -221,7 +226,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
 
         if (holder instanceof EnderChestHolder) {
             EnderChestHolder chestHolder = (EnderChestHolder) holder;
-            if (!chestHolder.editable) {
+            if (!canEditViewedChest(player, chestHolder.owner)) {
                 event.setCancelled(true);
                 return;
             }
@@ -241,7 +246,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             return;
         }
         EnderChestHolder chestHolder = (EnderChestHolder) holder;
-        if (!chestHolder.editable) {
+        if (!canEditViewedChest(event.getWhoClicked() instanceof Player ? (Player) event.getWhoClicked() : null, chestHolder.owner)) {
             event.setCancelled(true);
             return;
         }
@@ -263,18 +268,21 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             return;
         }
         EnderChestHolder chestHolder = (EnderChestHolder) holder;
-        if (!chestHolder.editable) {
+        if (!isLiveChestInventory(chestHolder.owner, event.getInventory())) {
             return;
         }
-        PlayerData data = getData(chestHolder.owner);
-        ItemStack[] contents = event.getInventory().getContents();
-        for (int i = 0; i < 54; i++) {
-            data.contents[i] = i < contents.length ? contents[i] : null;
+        if (canEditViewedChest(event.getPlayer() instanceof Player ? (Player) event.getPlayer() : null, chestHolder.owner)) {
+            saveInventoryContents(chestHolder.owner, event.getInventory());
+            if (getConfig().getBoolean("settings.save-on-close", true)) {
+                saveData(chestHolder.owner, getData(chestHolder.owner));
+            }
         }
-        if (getConfig().getBoolean("settings.save-on-close", true)) {
-            saveData(chestHolder.owner, data);
-        }
-        openCustomChest.remove(chestHolder.owner);
+        Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+            @Override
+            public void run() {
+                cleanupLiveChest(chestHolder.owner);
+            }
+        }, 1L);
     }
 
     private boolean reloadCommand(CommandSender sender) {
@@ -337,7 +345,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
             viewer.sendMessage(color(msg("player-not-found")));
             return true;
         }
-        openEnderChest(viewer, target.getUniqueId(), target.getName() == null ? args[1] : target.getName(), admin, true);
+        openEnderChest(viewer, target.getUniqueId(), target.getName() == null ? args[1] : target.getName(), true);
         return true;
     }
 
@@ -392,18 +400,22 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         player.openInventory(inventory);
     }
 
-    private void openEnderChest(Player viewer, UUID owner, String ownerName, boolean editable, boolean invsee) {
+    private void openEnderChest(Player viewer, UUID owner, String ownerName, boolean invsee) {
         PlayerData data = getData(owner);
         Map<String, String> placeholders = placeholders(data.slots, 0);
         placeholders.put("%player%", ownerName == null ? owner.toString() : ownerName);
         String titlePath = invsee ? "settings.invsee-title" : "settings.chest-title";
-        Inventory inventory = Bukkit.createInventory(
-                new EnderChestHolder(owner, data.slots, editable),
-                data.slots,
-                color(applyPlaceholders(getConfig().getString(titlePath, "&5Эндер-сундук"), placeholders))
-        );
-        for (int i = 0; i < data.slots; i++) {
-            inventory.setItem(i, data.contents[i]);
+        Inventory inventory = openEnderChests.get(owner);
+        if (inventory == null || inventory.getSize() != data.slots) {
+            inventory = Bukkit.createInventory(
+                    new EnderChestHolder(owner, data.slots),
+                    data.slots,
+                    color(applyPlaceholders(getConfig().getString(titlePath, "&5Эндер-сундук"), placeholders))
+            );
+            for (int i = 0; i < data.slots; i++) {
+                inventory.setItem(i, data.contents[i]);
+            }
+            openEnderChests.put(owner, inventory);
         }
         openCustomChest.add(owner);
         viewer.openInventory(inventory);
@@ -433,6 +445,7 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         }
         data.slots = upgrade.slots;
         saveData(player.getUniqueId(), data);
+        closeLiveChest(player.getUniqueId(), true);
         player.sendMessage(color(msg("upgraded")
                 .replace("%slots%", String.valueOf(data.slots))
                 .replace("%price%", formatMoney(upgrade.price))));
@@ -466,6 +479,12 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         Arrays.fill(data.contents, null);
         if (clearUpgrade) {
             data.slots = clampSlots(getConfig().getInt("settings.default-slots", 27));
+            closeLiveChest(uuid, false);
+        } else {
+            Inventory inventory = openEnderChests.get(uuid);
+            if (inventory != null) {
+                inventory.clear();
+            }
         }
         saveData(uuid, data);
     }
@@ -656,6 +675,64 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
         return hasPerm(sender, "ecrw.invsee.player") || hasPerm(sender, "ecrw.invsee.admin");
     }
 
+    private boolean canEditViewedChest(Player player, UUID owner) {
+        if (player == null) {
+            return false;
+        }
+        return player.getUniqueId().equals(owner) || hasPerm(player, "ecrw.invsee.admin");
+    }
+
+    private void saveInventoryContents(UUID owner, Inventory inventory) {
+        PlayerData data = getData(owner);
+        ItemStack[] contents = inventory.getContents();
+        for (int i = 0; i < 54; i++) {
+            data.contents[i] = i < contents.length ? contents[i] : null;
+        }
+    }
+
+    private boolean isLiveChestInventory(UUID owner, Inventory inventory) {
+        return openEnderChests.get(owner) == inventory;
+    }
+
+    private void cleanupLiveChest(UUID owner) {
+        Inventory inventory = openEnderChests.get(owner);
+        if (inventory == null) {
+            openCustomChest.remove(owner);
+            return;
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory() == inventory) {
+                return;
+            }
+        }
+        saveInventoryContents(owner, inventory);
+        if (getConfig().getBoolean("settings.save-on-close", true)) {
+            saveData(owner, getData(owner));
+        }
+        openEnderChests.remove(owner);
+        openCustomChest.remove(owner);
+    }
+
+    private void closeLiveChest(UUID owner, boolean saveContents) {
+        Inventory inventory = openEnderChests.remove(owner);
+        if (inventory == null) {
+            openCustomChest.remove(owner);
+            return;
+        }
+        if (saveContents) {
+            saveInventoryContents(owner, inventory);
+            if (getConfig().getBoolean("settings.save-on-close", true)) {
+                saveData(owner, getData(owner));
+            }
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory() == inventory) {
+                player.closeInventory();
+            }
+        }
+        openCustomChest.remove(owner);
+    }
+
     private String formatMoney(double value) {
         if (value == Math.floor(value)) {
             return String.valueOf((long) value);
@@ -834,12 +911,10 @@ public final class ReallyECPlugin extends JavaPlugin implements Listener, TabExe
     private static final class EnderChestHolder implements InventoryHolder {
         private final UUID owner;
         private final int unlockedSlots;
-        private final boolean editable;
 
-        private EnderChestHolder(UUID owner, int unlockedSlots, boolean editable) {
+        private EnderChestHolder(UUID owner, int unlockedSlots) {
             this.owner = owner;
             this.unlockedSlots = unlockedSlots;
-            this.editable = editable;
         }
 
         @Override
